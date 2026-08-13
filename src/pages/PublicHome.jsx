@@ -4,7 +4,52 @@ import { supabase } from '../supabaseClient'
 import Logo from '../components/Logo'
 
 const typeLabel = { villa: 'Villa', apartment: 'Apartment', yacht: 'Yacht' }
-const typeIcon = { villa: 'ti-building-estate', apartment: 'ti-building', yacht: 'ti-anchor' }
+
+function TypeIcon({ type, className }) {
+  if (type === 'yacht') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+        <path d="M3 17h18l-2 4H5l-2-4Z" strokeLinejoin="round" />
+        <path d="M6 17V9l6-5 6 5v8" strokeLinejoin="round" />
+        <path d="M12 4v13" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <path d="M4 21V9l8-6 8 6v12" strokeLinejoin="round" />
+      <path d="M9 21v-7h6v7" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function MenuIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={className}>
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="17" x2="20" y2="17" />
+    </svg>
+  )
+}
+
+function CloseIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={className}>
+      <line x1="5" y1="5" x2="19" y2="19" />
+      <line x1="19" y1="5" x2="5" y2="19" />
+    </svg>
+  )
+}
+
+function PinIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z" strokeLinejoin="round" />
+      <circle cx="12" cy="9.5" r="2.2" />
+    </svg>
+  )
+}
 
 export default function PublicHome() {
   const [properties, setProperties] = useState([])
@@ -54,6 +99,12 @@ export default function PublicHome() {
     })
   }, [properties, activeType, query, checkIn, checkOut, guestsFilter])
 
+  function adjustGuests(delta) {
+    const current = parseInt(guestsFilter) || 0
+    const next = Math.max(0, current + delta)
+    setGuestsFilter(next === 0 ? '' : String(next))
+  }
+
   return (
     <div className="min-h-screen bg-bone font-body">
       <header className="max-w-6xl mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-2 flex items-center justify-between">
@@ -85,16 +136,16 @@ export default function PublicHome() {
 
         <button
           onClick={() => setMobileMenuOpen((v) => !v)}
-          className="sm:hidden text-ink p-1.5 -mr-1.5"
+          className="sm:hidden text-ink p-2 -mr-2"
           aria-label="Menu"
         >
-          <i className="ti ti-menu-2 text-2xl" aria-hidden="true" />
+          {mobileMenuOpen ? <CloseIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
         </button>
       </header>
 
       {mobileMenuOpen && (
         <div className="sm:hidden max-w-6xl mx-auto px-6 pb-2">
-          <div className="bg-white border border-ink/10 rounded-xl overflow-hidden text-sm">
+          <div className="bg-white border border-ink/10 rounded-xl overflow-hidden text-sm shadow-sm">
             <button
               onClick={() => {
                 setActiveType('villa')
@@ -148,32 +199,39 @@ export default function PublicHome() {
           anywhere else.
         </p>
 
-        <div className="bg-white border border-ink/10 rounded-2xl sm:rounded-full p-3 sm:p-1.5 max-w-3xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Where to"
-              className="w-full sm:w-56 md:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
-            />
-            <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+        <div className="bg-white border border-ink/10 rounded-2xl sm:rounded-full shadow-sm p-2 sm:p-1.5 max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+            {/* Where to */}
+            <div className="flex items-center gap-2 px-3 py-2.5 sm:py-2 sm:w-56 md:w-64 flex-shrink-0">
+              <PinIcon className="w-4 h-4 text-muted flex-shrink-0" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Where to"
+                className="w-full bg-transparent text-sm text-ink placeholder-muted outline-none"
+              />
+            </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto bg-ink/[0.03] sm:bg-transparent rounded-lg sm:rounded-none px-3 py-2 sm:p-0">
-              <div className="flex-1 sm:flex-initial">
-                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+            <div className="w-px h-8 bg-ink/10 hidden sm:block" />
+            <div className="h-px bg-ink/10 sm:hidden mx-1" />
+
+            {/* Dates */}
+            <div className="flex items-stretch bg-ink/[0.025] sm:bg-transparent rounded-xl sm:rounded-none">
+              <div className="flex-1 sm:flex-initial px-3 py-2">
+                <div className="text-[9px] uppercase tracking-wider text-muted font-medium">
                   Check-in
                 </div>
                 <input
                   type="date"
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
-                  className="w-full sm:w-auto min-w-0 bg-transparent sm:px-3 sm:py-2 text-sm text-ink outline-none"
+                  className="w-full sm:w-[128px] bg-transparent text-sm text-ink outline-none text-left [&::-webkit-date-and-time-value]:text-left"
                   aria-label="Check-in"
                 />
               </div>
-              <span className="text-muted text-sm hidden sm:inline">–</span>
-              <div className="flex-1 sm:flex-initial">
-                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+              <div className="w-px bg-ink/10 my-2" />
+              <div className="flex-1 sm:flex-initial px-3 py-2">
+                <div className="text-[9px] uppercase tracking-wider text-muted font-medium">
                   Check-out
                 </div>
                 <input
@@ -181,35 +239,57 @@ export default function PublicHome() {
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
                   min={checkIn || undefined}
-                  className="w-full sm:w-auto min-w-0 bg-transparent sm:px-3 sm:py-2 text-sm text-ink outline-none"
+                  className="w-full sm:w-[128px] bg-transparent text-sm text-ink outline-none text-left [&::-webkit-date-and-time-value]:text-left"
                   aria-label="Check-out"
                 />
               </div>
             </div>
 
-            <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+            <div className="w-px h-8 bg-ink/10 hidden sm:block" />
+            <div className="h-px bg-ink/10 sm:hidden mx-1" />
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-initial bg-ink/[0.03] sm:bg-transparent rounded-lg sm:rounded-none px-3 py-2 sm:p-0">
-                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+            {/* Guests */}
+            <div className="flex items-center justify-between gap-3 bg-ink/[0.025] sm:bg-transparent rounded-xl sm:rounded-none px-3 py-2 sm:w-auto">
+              <div className="flex-1">
+                <div className="text-[9px] uppercase tracking-wider text-muted font-medium">
                   Guests
                 </div>
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   value={guestsFilter}
                   onChange={(e) => setGuestsFilter(e.target.value)}
-                  placeholder="Any"
-                  className="w-full sm:w-[70px] bg-transparent sm:pl-3 sm:py-2 text-sm text-ink placeholder-muted outline-none"
+                  placeholder="Add guests"
+                  className="w-16 bg-transparent text-sm text-ink placeholder-muted outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
-              <button
-                type="button"
-                className="flex-shrink-0 bg-forest text-bone rounded-full px-5 py-2.5 sm:py-2 text-sm font-medium hover:bg-forestlight transition"
-              >
-                Search
-              </button>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => adjustGuests(-1)}
+                  disabled={!guestsFilter}
+                  className="w-6 h-6 rounded-full border border-ink/20 text-ink flex items-center justify-center text-sm disabled:opacity-30 hover:border-ink/40 transition"
+                  aria-label="Decrease guests"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  onClick={() => adjustGuests(1)}
+                  className="w-6 h-6 rounded-full bg-forest text-bone flex items-center justify-center text-sm hover:bg-forestlight transition"
+                  aria-label="Increase guests"
+                >
+                  +
+                </button>
+              </div>
             </div>
+
+            <button
+              type="button"
+              className="w-full sm:w-auto sm:ml-2 mt-1 sm:mt-0 flex-shrink-0 bg-forest text-bone rounded-full px-6 py-2.5 sm:py-2 text-sm font-medium hover:bg-forestlight transition"
+            >
+              Search
+            </button>
           </div>
         </div>
         {(query || checkIn || checkOut || guestsFilter || activeType !== 'all') && (
@@ -248,10 +328,7 @@ export default function PublicHome() {
                       className="w-full h-full object-cover group-hover:scale-[1.02] transition duration-300"
                     />
                   ) : (
-                    <i
-                      className={`ti ${typeIcon[property.type]} text-3xl text-ink/30`}
-                      aria-hidden="true"
-                    />
+                    <TypeIcon type={property.type} className="w-8 h-8 text-ink/25" />
                   )}
                 </div>
                 <div className="text-[10px] uppercase tracking-wider text-brass mb-1">

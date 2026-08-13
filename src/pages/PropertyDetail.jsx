@@ -3,6 +3,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Logo from '../components/Logo'
 
+function PhotoIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.5" />
+      <path d="m4 17 5-4 4 3 3-2.5 4 3.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 const typeLabel = { villa: 'Villa', apartment: 'Apartment', yacht: 'Yacht' }
 
 export default function PropertyDetail() {
@@ -70,7 +80,7 @@ export default function PropertyDetail() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <i className="ti ti-photo text-4xl text-ink/25" aria-hidden="true" />
+            <PhotoIcon className="w-10 h-10 text-ink/25" />
           )}
         </div>
 
