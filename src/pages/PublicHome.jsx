@@ -55,9 +55,9 @@ export default function PublicHome() {
 
   return (
     <div className="min-h-screen bg-bone font-body">
-      <header className="max-w-6xl mx-auto px-8 pt-10 pb-2 flex items-center justify-between">
+      <header className="max-w-6xl mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Logo />
-        <nav className="flex items-center gap-7 text-sm text-muted">
+        <nav className="flex flex-wrap items-center gap-4 sm:gap-7 text-sm text-muted">
           <button
             onClick={() => setActiveType('villa')}
             className={activeType === 'villa' ? 'text-ink' : 'hover:text-ink transition'}
@@ -82,13 +82,13 @@ export default function PublicHome() {
         </nav>
       </header>
 
-      <div className="max-w-6xl mx-auto px-8 pb-8">
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 pb-8">
         <div className="text-[11px] uppercase tracking-wider text-brass font-medium">
           Travel the world for less
         </div>
       </div>
 
-      <section className="max-w-6xl mx-auto px-8 pb-10">
+      <section className="max-w-6xl mx-auto px-6 sm:px-8 pb-10">
         <h1 className="font-serif font-medium text-ink text-4xl md:text-[42px] leading-tight max-w-xl mx-auto text-center mb-3">
           Extraordinary stays, without the price tag
         </h1>
@@ -97,45 +97,52 @@ export default function PublicHome() {
           anywhere else.
         </p>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-0 bg-white border border-ink/10 rounded-full sm:rounded-full p-2 sm:p-1.5 max-w-3xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 bg-white border border-ink/10 rounded-2xl sm:rounded-full p-3 sm:p-1.5 max-w-3xl mx-auto">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Where to"
-            className="w-56 sm:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
+            className="w-full sm:w-56 md:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
           />
           <div className="w-px h-5 bg-ink/10 hidden sm:block" />
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className="bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none min-w-0"
-            aria-label="Check-in"
-          />
-          <span className="text-muted text-sm">–</span>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            min={checkIn || undefined}
-            className="bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none min-w-0"
-            aria-label="Check-out"
-          />
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="date"
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
+              className="flex-1 sm:flex-initial min-w-0 bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none"
+              aria-label="Check-in"
+            />
+            <span className="text-muted text-sm">–</span>
+            <input
+              type="date"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+              min={checkIn || undefined}
+              className="flex-1 sm:flex-initial min-w-0 bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none"
+              aria-label="Check-out"
+            />
+          </div>
+
           <div className="w-px h-5 bg-ink/10 hidden sm:block" />
-          <input
-            type="number"
-            min="1"
-            value={guestsFilter}
-            onChange={(e) => setGuestsFilter(e.target.value)}
-            placeholder="Guests"
-            className="w-24 sm:w-[92px] flex-shrink-0 bg-transparent pl-2 sm:pl-3 pr-1 py-2 text-sm text-ink placeholder-muted outline-none"
-          />
-          <button
-            type="button"
-            className="w-full sm:w-auto sm:ml-auto bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition"
-          >
-            Search
-          </button>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="number"
+              min="1"
+              value={guestsFilter}
+              onChange={(e) => setGuestsFilter(e.target.value)}
+              placeholder="Guests"
+              className="flex-1 sm:flex-initial sm:w-[92px] bg-transparent pl-2 sm:pl-3 pr-1 py-2 text-sm text-ink placeholder-muted outline-none"
+            />
+            <button
+              type="button"
+              className="flex-shrink-0 bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition"
+            >
+              Search
+            </button>
+          </div>
         </div>
         {(query || checkIn || checkOut || guestsFilter || activeType !== 'all') && (
           <button
@@ -153,7 +160,7 @@ export default function PublicHome() {
         )}
       </section>
 
-      <main className="max-w-6xl mx-auto px-8 pb-20">
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 pb-20">
         {loading ? (
           <p className="text-muted text-sm">Loading properties…</p>
         ) : filtered.length === 0 ? (

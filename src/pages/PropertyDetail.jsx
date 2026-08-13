@@ -52,7 +52,7 @@ export default function PropertyDetail() {
 
   return (
     <div className="min-h-screen bg-bone font-body">
-      <header className="max-w-6xl mx-auto px-8 pt-10 pb-6 flex items-center justify-between">
+      <header className="max-w-6xl mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-6 flex items-center justify-between">
         <Link to="/">
           <Logo />
         </Link>
@@ -61,7 +61,7 @@ export default function PropertyDetail() {
         </Link>
       </header>
 
-      <main className="max-w-6xl mx-auto px-8 pb-20">
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 pb-20">
         <div className="rounded-xl h-96 bg-stone overflow-hidden mb-3 flex items-center justify-center">
           {photos[activePhoto] ? (
             <img
@@ -75,7 +75,7 @@ export default function PropertyDetail() {
         </div>
 
         {photos.length > 1 && (
-          <div className="flex gap-2 mb-10">
+          <div className="flex gap-2 mb-10 overflow-x-auto pb-1 -mx-6 px-6 sm:mx-0 sm:px-0">
             {photos.map((url, i) => (
               <button
                 key={i}
