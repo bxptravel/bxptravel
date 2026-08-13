@@ -14,6 +14,7 @@ export default function PublicHome() {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [guestsFilter, setGuestsFilter] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     loadProperties()
@@ -55,9 +56,10 @@ export default function PublicHome() {
 
   return (
     <div className="min-h-screen bg-bone font-body">
-      <header className="max-w-6xl mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+      <header className="max-w-6xl mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-2 flex items-center justify-between">
         <Logo />
-        <nav className="flex flex-wrap items-center gap-4 sm:gap-7 text-sm text-muted">
+
+        <nav className="hidden sm:flex items-center gap-7 text-sm text-muted">
           <button
             onClick={() => setActiveType('villa')}
             className={activeType === 'villa' ? 'text-ink' : 'hover:text-ink transition'}
@@ -80,7 +82,56 @@ export default function PublicHome() {
             Enquire
           </Link>
         </nav>
+
+        <button
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          className="sm:hidden text-ink p-1.5 -mr-1.5"
+          aria-label="Menu"
+        >
+          <i className="ti ti-menu-2 text-2xl" aria-hidden="true" />
+        </button>
       </header>
+
+      {mobileMenuOpen && (
+        <div className="sm:hidden max-w-6xl mx-auto px-6 pb-2">
+          <div className="bg-white border border-ink/10 rounded-xl overflow-hidden text-sm">
+            <button
+              onClick={() => {
+                setActiveType('villa')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left px-4 py-3 text-ink border-b border-ink/5"
+            >
+              Villas
+            </button>
+            <button
+              onClick={() => {
+                setActiveType('apartment')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left px-4 py-3 text-ink border-b border-ink/5"
+            >
+              Apartments
+            </button>
+            <button
+              onClick={() => {
+                setActiveType('yacht')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left px-4 py-3 text-ink border-b border-ink/5"
+            >
+              Yachts
+            </button>
+            <Link
+              to="/enquire"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-4 py-3 text-forest font-medium"
+            >
+              Enquire
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-6 sm:px-8 pb-8">
         <div className="text-[11px] uppercase tracking-wider text-brass font-medium">
@@ -97,51 +148,68 @@ export default function PublicHome() {
           anywhere else.
         </p>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 bg-white border border-ink/10 rounded-2xl sm:rounded-full p-3 sm:p-1.5 max-w-3xl mx-auto">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Where to"
-            className="w-full sm:w-56 md:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
-          />
-          <div className="w-px h-5 bg-ink/10 hidden sm:block" />
-
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="bg-white border border-ink/10 rounded-2xl sm:rounded-full p-3 sm:p-1.5 max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
             <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="flex-1 sm:flex-initial min-w-0 bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none"
-              aria-label="Check-in"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Where to"
+              className="w-full sm:w-56 md:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
             />
-            <span className="text-muted text-sm">–</span>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              min={checkIn || undefined}
-              className="flex-1 sm:flex-initial min-w-0 bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none"
-              aria-label="Check-out"
-            />
-          </div>
+            <div className="w-px h-5 bg-ink/10 hidden sm:block" />
 
-          <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+            <div className="flex items-center gap-2 w-full sm:w-auto bg-ink/[0.03] sm:bg-transparent rounded-lg sm:rounded-none px-3 py-2 sm:p-0">
+              <div className="flex-1 sm:flex-initial">
+                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+                  Check-in
+                </div>
+                <input
+                  type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  className="w-full sm:w-auto min-w-0 bg-transparent sm:px-3 sm:py-2 text-sm text-ink outline-none"
+                  aria-label="Check-in"
+                />
+              </div>
+              <span className="text-muted text-sm hidden sm:inline">–</span>
+              <div className="flex-1 sm:flex-initial">
+                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+                  Check-out
+                </div>
+                <input
+                  type="date"
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  min={checkIn || undefined}
+                  className="w-full sm:w-auto min-w-0 bg-transparent sm:px-3 sm:py-2 text-sm text-ink outline-none"
+                  aria-label="Check-out"
+                />
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="number"
-              min="1"
-              value={guestsFilter}
-              onChange={(e) => setGuestsFilter(e.target.value)}
-              placeholder="Guests"
-              className="flex-1 sm:flex-initial sm:w-[92px] bg-transparent pl-2 sm:pl-3 pr-1 py-2 text-sm text-ink placeholder-muted outline-none"
-            />
-            <button
-              type="button"
-              className="flex-shrink-0 bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition"
-            >
-              Search
-            </button>
+            <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex-1 sm:flex-initial bg-ink/[0.03] sm:bg-transparent rounded-lg sm:rounded-none px-3 py-2 sm:p-0">
+                <div className="text-[10px] uppercase tracking-wider text-muted sm:hidden">
+                  Guests
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  value={guestsFilter}
+                  onChange={(e) => setGuestsFilter(e.target.value)}
+                  placeholder="Any"
+                  className="w-full sm:w-[70px] bg-transparent sm:pl-3 sm:py-2 text-sm text-ink placeholder-muted outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                className="flex-shrink-0 bg-forest text-bone rounded-full px-5 py-2.5 sm:py-2 text-sm font-medium hover:bg-forestlight transition"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
         {(query || checkIn || checkOut || guestsFilter || activeType !== 'all') && (
