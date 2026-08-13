@@ -50,14 +50,14 @@ export default function AdminProperties() {
     }
   }
 
-  const typeLabel = { hotel: 'Hotel', resort: 'Resort', yacht: 'Yacht' }
+  const typeLabel = { villa: 'Villa', apartment: 'Apartment', yacht: 'Yacht' }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-serif font-medium text-3xl text-ink">Properties</h1>
-          <p className="text-muted text-sm mt-1">Manage your hotels, resorts, and yachts</p>
+          <p className="text-muted text-sm mt-1">Manage your villas, apartments, and yachts</p>
         </div>
         <Link
           to="/admin/properties/new"
@@ -78,7 +78,7 @@ export default function AdminProperties() {
       ) : properties.length === 0 ? (
         <div className="text-center py-20 text-muted border border-ink/10 rounded-xl bg-white">
           <p className="text-lg mb-1 font-serif text-ink">No properties yet</p>
-          <p className="text-sm">Add your first hotel, resort, or yacht to get started</p>
+          <p className="text-sm">Add your first villa, apartment, or yacht to get started</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

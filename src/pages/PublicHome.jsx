@@ -3,14 +3,17 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Logo from '../components/Logo'
 
-const typeLabel = { hotel: 'Hotel', resort: 'Resort', yacht: 'Yacht' }
-const typeIcon = { hotel: 'ti-building-skyscraper', resort: 'ti-building-estate', yacht: 'ti-anchor' }
+const typeLabel = { villa: 'Villa', apartment: 'Apartment', yacht: 'Yacht' }
+const typeIcon = { villa: 'ti-building-estate', apartment: 'ti-building', yacht: 'ti-anchor' }
 
 export default function PublicHome() {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeType, setActiveType] = useState('all')
   const [query, setQuery] = useState('')
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
+  const [guestsFilter, setGuestsFilter] = useState('')
 
   useEffect(() => {
     loadProperties()
@@ -31,29 +34,41 @@ export default function PublicHome() {
   const filtered = useMemo(() => {
     return properties.filter((p) => {
       const matchesType = activeType === 'all' || p.type === activeType
+
       const q = query.toLowerCase()
       const matchesQuery =
         !q || p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q)
-      return matchesType && matchesQuery
+
+      const matchesGuests =
+        !guestsFilter || (p.guests_capacity && p.guests_capacity >= parseInt(guestsFilter))
+
+      let matchesDates = true
+      if (checkIn && checkOut && p.blocked_dates?.length) {
+        matchesDates = !p.blocked_dates.some(
+          (range) => checkIn < range.end && checkOut > range.start
+        )
+      }
+
+      return matchesType && matchesQuery && matchesGuests && matchesDates
     })
-  }, [properties, activeType, query])
+  }, [properties, activeType, query, checkIn, checkOut, guestsFilter])
 
   return (
     <div className="min-h-screen bg-bone font-body">
-      <header className="max-w-6xl mx-auto px-8 pt-10 pb-6 flex items-center justify-between">
+      <header className="max-w-6xl mx-auto px-8 pt-10 pb-2 flex items-center justify-between">
         <Logo />
         <nav className="flex items-center gap-7 text-sm text-muted">
           <button
-            onClick={() => setActiveType('hotel')}
-            className={activeType === 'hotel' ? 'text-ink' : 'hover:text-ink transition'}
+            onClick={() => setActiveType('villa')}
+            className={activeType === 'villa' ? 'text-ink' : 'hover:text-ink transition'}
           >
-            Hotels
+            Villas
           </button>
           <button
-            onClick={() => setActiveType('resort')}
-            className={activeType === 'resort' ? 'text-ink' : 'hover:text-ink transition'}
+            onClick={() => setActiveType('apartment')}
+            className={activeType === 'apartment' ? 'text-ink' : 'hover:text-ink transition'}
           >
-            Resorts
+            Apartments
           </button>
           <button
             onClick={() => setActiveType('yacht')}
@@ -67,29 +82,75 @@ export default function PublicHome() {
         </nav>
       </header>
 
+      <div className="max-w-6xl mx-auto px-8 pb-8">
+        <div className="text-[11px] uppercase tracking-wider text-brass font-medium">
+          Travel the world for less
+        </div>
+      </div>
+
       <section className="max-w-6xl mx-auto px-8 pb-10">
-        <h1 className="font-serif font-medium text-ink text-4xl md:text-[42px] leading-tight max-w-xl mb-3">
-          Curated stays, quietly extraordinary
+        <h1 className="font-serif font-medium text-ink text-4xl md:text-[42px] leading-tight max-w-xl mx-auto text-center mb-3">
+          Extraordinary stays, without the price tag
         </h1>
-        <p className="text-muted text-sm max-w-md mb-6">
-          A private collection of villas, resorts, and yachts — personally vetted before they
-          reach you.
+        <p className="text-muted text-sm max-w-md mx-auto text-center mb-6">
+          A bespoke collection of villas, apartments and yachts — for a price you won't find
+          anywhere else.
         </p>
 
-        <div className="flex items-center bg-white border border-ink/10 rounded-full p-1.5 max-w-xl">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-0 bg-white border border-ink/10 rounded-full sm:rounded-full p-2 sm:p-1.5 max-w-3xl mx-auto">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or destination"
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-ink placeholder-muted outline-none"
+            placeholder="Where to"
+            className="w-56 sm:w-64 flex-shrink-0 bg-transparent px-3 sm:px-4 py-2 text-sm text-ink placeholder-muted outline-none"
+          />
+          <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+          <input
+            type="date"
+            value={checkIn}
+            onChange={(e) => setCheckIn(e.target.value)}
+            className="bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none min-w-0"
+            aria-label="Check-in"
+          />
+          <span className="text-muted text-sm">–</span>
+          <input
+            type="date"
+            value={checkOut}
+            onChange={(e) => setCheckOut(e.target.value)}
+            min={checkIn || undefined}
+            className="bg-transparent px-2 sm:px-3 py-2 text-sm text-ink outline-none min-w-0"
+            aria-label="Check-out"
+          />
+          <div className="w-px h-5 bg-ink/10 hidden sm:block" />
+          <input
+            type="number"
+            min="1"
+            value={guestsFilter}
+            onChange={(e) => setGuestsFilter(e.target.value)}
+            placeholder="Guests"
+            className="w-24 sm:w-[92px] flex-shrink-0 bg-transparent pl-2 sm:pl-3 pr-1 py-2 text-sm text-ink placeholder-muted outline-none"
           />
           <button
-            onClick={() => setActiveType('all')}
-            className="bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition"
+            type="button"
+            className="w-full sm:w-auto sm:ml-auto bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition"
           >
-            Show all
+            Search
           </button>
         </div>
+        {(query || checkIn || checkOut || guestsFilter || activeType !== 'all') && (
+          <button
+            onClick={() => {
+              setQuery('')
+              setCheckIn('')
+              setCheckOut('')
+              setGuestsFilter('')
+              setActiveType('all')
+            }}
+            className="block mx-auto w-fit text-xs text-muted hover:text-ink mt-2 underline"
+          >
+            Clear all filters
+          </button>
+        )}
       </section>
 
       <main className="max-w-6xl mx-auto px-8 pb-20">
@@ -124,7 +185,11 @@ export default function PublicHome() {
                 <div className="font-serif text-lg text-ink mb-0.5">{property.name}</div>
                 <div className="text-xs text-muted">
                   {property.location}
-                  {property.price_from ? ` · from £${Number(property.price_from).toLocaleString()}/night` : ''}
+                  {property.price_from
+                    ? property.guests_capacity
+                      ? ` · from £${Math.round(property.price_from / property.guests_capacity).toLocaleString()} per person/night`
+                      : ` · from £${Number(property.price_from).toLocaleString()}/night`
+                    : ''}
                 </div>
               </Link>
             ))}

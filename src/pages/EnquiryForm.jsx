@@ -162,8 +162,8 @@ export default function EnquiryForm() {
                   className={inputClass}
                 >
                   <option value="">Select...</option>
-                  <option value="hotel">Hotel</option>
-                  <option value="resort">Resort</option>
+                  <option value="villa">Villa</option>
+                  <option value="apartment">Apartment</option>
                   <option value="yacht">Yacht</option>
                 </select>
               </div>

@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient'
 const emptyForm = {
   name: '',
   location: '',
-  type: 'hotel',
+  type: 'villa',
   description: '',
   guests_capacity: '',
   bedrooms: '',
@@ -22,6 +22,9 @@ export default function PropertyForm() {
 
   const [form, setForm] = useState(emptyForm)
   const [photos, setPhotos] = useState([]) // existing photo URLs
+  const [blockedDates, setBlockedDates] = useState([]) // [{start, end}]
+  const [newRangeStart, setNewRangeStart] = useState('')
+  const [newRangeEnd, setNewRangeEnd] = useState('')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -39,7 +42,7 @@ export default function PropertyForm() {
       setForm({
         name: data.name || '',
         location: data.location || '',
-        type: data.type || 'hotel',
+        type: data.type || 'villa',
         description: data.description || '',
         guests_capacity: data.guests_capacity || '',
         bedrooms: data.bedrooms || '',
@@ -49,6 +52,7 @@ export default function PropertyForm() {
         featured: data.featured || false,
       })
       setPhotos(data.photos || [])
+      setBlockedDates(data.blocked_dates || [])
     }
     setLoading(false)
   }
@@ -98,6 +102,18 @@ export default function PropertyForm() {
     setPhotos((prev) => [url, ...prev.filter((p) => p !== url)])
   }
 
+  function addBlockedRange() {
+    if (!newRangeStart || !newRangeEnd) return
+    if (newRangeEnd < newRangeStart) return
+    setBlockedDates((prev) => [...prev, { start: newRangeStart, end: newRangeEnd }])
+    setNewRangeStart('')
+    setNewRangeEnd('')
+  }
+
+  function removeBlockedRange(index) {
+    setBlockedDates((prev) => prev.filter((_, i) => i !== index))
+  }
+
   async function handleSave(e) {
     e.preventDefault()
     setSaving(true)
@@ -110,6 +126,7 @@ export default function PropertyForm() {
       price_from: form.price_from ? parseFloat(form.price_from) : null,
       photos,
       cover_photo: photos[0] || null,
+      blocked_dates: blockedDates,
     }
 
     let saveError
@@ -182,8 +199,8 @@ export default function PropertyForm() {
               onChange={(e) => updateField('type', e.target.value)}
               className={inputClass}
             >
-              <option value="hotel">Hotel</option>
-              <option value="resort">Resort</option>
+              <option value="villa">Villa</option>
+              <option value="apartment">Apartment</option>
               <option value="yacht">Yacht</option>
             </select>
           </div>
@@ -213,7 +230,7 @@ export default function PropertyForm() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Price from (per night)</label>
+            <label className={labelClass}>Price from (total per night)</label>
             <input
               type="number"
               min="0"
@@ -222,6 +239,10 @@ export default function PropertyForm() {
               className={inputClass}
               placeholder="e.g. 2500"
             />
+            <p className="text-xs text-muted mt-1">
+              Total for the whole property per night — the site shows this divided by guest
+              capacity as "per person/night".
+            </p>
           </div>
           <div>
             <label className={labelClass}>Status</label>
@@ -300,6 +321,63 @@ export default function PropertyForm() {
           </label>
           <p className="text-xs text-muted mt-1.5">
             First photo (or the one marked "Cover") is used as the main gallery image.
+          </p>
+        </div>
+
+        <div>
+          <label className={labelClass}>Blocked dates (unavailable for booking)</label>
+
+          {blockedDates.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {blockedDates.map((range, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between bg-white border border-ink/10 rounded-lg px-4 py-2 text-sm"
+                >
+                  <span className="text-ink">
+                    {range.start} → {range.end}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeBlockedRange(i)}
+                    className="text-xs text-red-700 hover:text-red-900"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <label className="block text-[10px] text-muted mb-1">Start</label>
+              <input
+                type="date"
+                value={newRangeStart}
+                onChange={(e) => setNewRangeStart(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[10px] text-muted mb-1">End</label>
+              <input
+                type="date"
+                value={newRangeEnd}
+                onChange={(e) => setNewRangeEnd(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={addBlockedRange}
+              className="bg-ink/5 hover:bg-ink/10 text-ink rounded-lg px-4 py-2.5 text-sm border border-ink/15 transition"
+            >
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-muted mt-1.5">
+            Guests searching dates that overlap any range above won't see this property.
           </p>
         </div>
 

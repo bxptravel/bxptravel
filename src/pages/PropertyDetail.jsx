@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Logo from '../components/Logo'
 
-const typeLabel = { hotel: 'Hotel', resort: 'Resort', yacht: 'Yacht' }
+const typeLabel = { villa: 'Villa', apartment: 'Apartment', yacht: 'Yacht' }
 
 export default function PropertyDetail() {
   const { id } = useParams()
@@ -123,9 +123,13 @@ export default function PropertyDetail() {
               {property.price_from && (
                 <div className="mb-4">
                   <span className="font-serif text-2xl text-ink">
-                    £{Number(property.price_from).toLocaleString()}
+                    £{property.guests_capacity
+                      ? Math.round(property.price_from / property.guests_capacity).toLocaleString()
+                      : Number(property.price_from).toLocaleString()}
                   </span>
-                  <span className="text-muted text-sm"> / night from</span>
+                  <span className="text-muted text-sm">
+                    {property.guests_capacity ? ' per person/night from' : ' / night from'}
+                  </span>
                 </div>
               )}
               <button
