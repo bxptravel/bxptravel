@@ -13,6 +13,7 @@ const emptyForm = {
   currency: 'GBP',
   status: 'active',
   featured: false,
+  renter_id: '',
 }
 
 export default function PropertyForm() {
@@ -29,6 +30,16 @@ export default function PropertyForm() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(isEditing)
+  const [renters, setRenters] = useState([])
+
+  useEffect(() => {
+    loadRenters()
+  }, [])
+
+  async function loadRenters() {
+    const { data } = await supabase.from('profiles').select('id, email, full_name').eq('role', 'renter')
+    setRenters(data || [])
+  }
 
   useEffect(() => {
     if (isEditing) loadProperty()
@@ -50,6 +61,7 @@ export default function PropertyForm() {
         currency: data.currency || 'GBP',
         status: data.status || 'active',
         featured: data.featured || false,
+        renter_id: data.renter_id || '',
       })
       setPhotos(data.photos || [])
       setBlockedDates(data.blocked_dates || [])
@@ -127,6 +139,7 @@ export default function PropertyForm() {
       photos,
       cover_photo: photos[0] || null,
       blocked_dates: blockedDates,
+      renter_id: form.renter_id || null,
     }
 
     let saveError
@@ -255,6 +268,25 @@ export default function PropertyForm() {
               <option value="hidden">Hidden (draft)</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Renter (who manages this property)</label>
+          <select
+            value={form.renter_id}
+            onChange={(e) => updateField('renter_id', e.target.value)}
+            className={inputClass}
+          >
+            <option value="">No renter assigned</option>
+            {renters.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.full_name || r.email}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted mt-1">
+            Bookings for this property need a renter assigned so they can approve/decline.
+          </p>
         </div>
 
         <div>

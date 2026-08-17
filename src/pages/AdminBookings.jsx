@@ -12,6 +12,25 @@ const statusLabel = {
   cancelled: 'Cancelled',
 }
 
+function calculateBalanceDueDate(checkInStr) {
+  const today = new Date()
+  const checkIn = new Date(checkInStr)
+  const daysUntilCheckin = Math.ceil((checkIn - today) / (1000 * 60 * 60 * 24))
+
+  if (daysUntilCheckin < 7) {
+    return today.toISOString().split('T')[0]
+  }
+
+  const approvedPlus14 = new Date(today)
+  approvedPlus14.setDate(today.getDate() + 14)
+
+  const checkinMinus7 = new Date(checkIn)
+  checkinMinus7.setDate(checkIn.getDate() - 7)
+
+  const dueDate = approvedPlus14 < checkinMinus7 ? approvedPlus14 : checkinMinus7
+  return dueDate.toISOString().split('T')[0]
+}
+
 const emptyForm = {
   customer_id: '',
   property_id: '',
@@ -118,6 +137,32 @@ export default function AdminBookings() {
     }
   }
 
+  async function handleApproveOnBehalf(booking) {
+    setUpdating(booking.id)
+    const balanceDueDate = calculateBalanceDueDate(booking.check_in)
+    await supabase
+      .from('bookings')
+      .update({
+        status: 'confirmed',
+        approved_at: new Date().toISOString(),
+        balance_due_date: balanceDueDate,
+      })
+      .eq('id', booking.id)
+    await loadEverything()
+    setUpdating(null)
+  }
+
+  async function handleDeclineOnBehalf(booking) {
+    if (!confirm('Decline this booking? The customer will be told to expect a refund.')) return
+    setUpdating(booking.id)
+    await supabase
+      .from('bookings')
+      .update({ status: 'declined', declined_at: new Date().toISOString() })
+      .eq('id', booking.id)
+    await loadEverything()
+    setUpdating(null)
+  }
+
   async function verifyDeposit(booking) {
     setUpdating(booking.id)
     await supabase
@@ -217,6 +262,33 @@ export default function AdminBookings() {
                     </div>
                   )}
                 </div>
+
+                {booking.status === 'pending_renter_approval' && (
+                  <div>
+                    {!booking.renter_id && (
+                      <p className="text-xs text-red-700 mb-2">
+                        No renter assigned to this property — you'll need to decide on their
+                        behalf, or assign a renter to the property first.
+                      </p>
+                    )}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleApproveOnBehalf(booking)}
+                        disabled={updating === booking.id}
+                        className="bg-forest text-bone rounded-full px-5 py-2 text-sm font-medium hover:bg-forestlight transition disabled:opacity-60"
+                      >
+                        {updating === booking.id ? 'Updating…' : 'Approve (on behalf of renter)'}
+                      </button>
+                      <button
+                        onClick={() => handleDeclineOnBehalf(booking)}
+                        disabled={updating === booking.id}
+                        className="bg-red-50 text-red-700 rounded-full px-5 py-2 text-sm font-medium hover:bg-red-100 transition disabled:opacity-60"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {booking.status === 'deposit_submitted' && (
                   <button
