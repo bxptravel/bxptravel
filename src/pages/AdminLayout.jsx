@@ -31,6 +31,9 @@ export default function AdminLayout() {
             <NavLink to="/admin/enquiries" className={linkClass}>
               Enquiries
             </NavLink>
+            <NavLink to="/admin/bookings" className={linkClass}>
+              Bookings
+            </NavLink>
           </nav>
 
           <button
