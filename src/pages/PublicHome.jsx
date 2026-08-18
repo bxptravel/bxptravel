@@ -199,8 +199,8 @@ export default function PublicHome() {
           anywhere else.
         </p>
 
-        <div className="bg-white border border-ink/10 rounded-2xl sm:rounded-full shadow-sm p-2 sm:p-1.5 max-w-3xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+        <div className="bg-white border border-ink/10 rounded-2xl sm:rounded-full shadow-sm p-2 sm:p-1.5 max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center gap-1 sm:gap-0">
             {/* Where to */}
             <div className="flex items-center gap-2 px-3 py-2.5 sm:py-2 sm:w-56 md:w-64 flex-shrink-0">
               <PinIcon className="w-4 h-4 text-muted flex-shrink-0" />
@@ -249,8 +249,8 @@ export default function PublicHome() {
             <div className="h-px bg-ink/10 sm:hidden mx-1" />
 
             {/* Guests */}
-            <div className="flex items-center justify-between gap-3 bg-ink/[0.025] sm:bg-transparent rounded-xl sm:rounded-none px-3 py-2 sm:w-auto">
-              <div className="flex-1">
+            <div className="flex items-center justify-between gap-4 bg-ink/[0.025] sm:bg-transparent rounded-xl sm:rounded-none px-3 py-2 sm:w-auto flex-shrink-0">
+              <div className="flex-1 min-w-[88px]">
                 <div className="text-[9px] uppercase tracking-wider text-muted font-medium">
                   Guests
                 </div>
@@ -260,10 +260,10 @@ export default function PublicHome() {
                   value={guestsFilter}
                   onChange={(e) => setGuestsFilter(e.target.value)}
                   placeholder="Add guests"
-                  className="w-16 bg-transparent text-sm text-ink placeholder-muted outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-transparent text-sm text-ink placeholder-muted outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
+              <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
                 <button
                   type="button"
                   onClick={() => adjustGuests(-1)}
