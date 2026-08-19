@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import Logo from '../components/Logo'
+
+const typeLabel = { villa: 'Villas', apartment: 'Apartments', yacht: 'Yachts' }
 
 export default function EnquiryForm() {
   const [searchParams] = useSearchParams()
   const propertyId = searchParams.get('property')
   const propertyName = searchParams.get('name')
   const propertyType = searchParams.get('type')
+
+  const [properties, setProperties] = useState([])
+  const [propertySelection, setPropertySelection] = useState('')
 
   const [form, setForm] = useState({
     name: '',
@@ -25,24 +30,52 @@ export default function EnquiryForm() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  useEffect(() => {
+    if (!propertyName) loadProperties()
+  }, [])
+
+  async function loadProperties() {
+    const { data } = await supabase
+      .from('properties')
+      .select('id, name, type')
+      .eq('status', 'active')
+      .order('name', { ascending: true })
+    setProperties(data || [])
+  }
+
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
+
+  const groupedProperties = properties.reduce((acc, p) => {
+    acc[p.type] = acc[p.type] || []
+    acc[p.type].push(p)
+    return acc
+  }, {})
+
+  const selectedProperty = properties.find((p) => p.id === propertySelection)
+  const isGeneral = propertySelection === 'general' || (!propertySelection && !propertyName)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setSubmitting(true)
     setError('')
 
+    const finalPropertyId = propertyId || (selectedProperty ? selectedProperty.id : null)
+    const finalPropertyName = propertyName || (selectedProperty ? selectedProperty.name : null)
+    const finalBookingType =
+      propertyType || (selectedProperty ? selectedProperty.type : form.booking_type) || null
+    const finalDestination = form.destination || finalPropertyName || null
+
     const { error } = await supabase.from('enquiries').insert({
-      property_id: propertyId || null,
-      property_name_snapshot: propertyName || null,
+      property_id: finalPropertyId,
+      property_name_snapshot: finalPropertyName,
       name: form.name,
       email: form.email,
       phone: form.phone,
       preferred_contact: form.preferred_contact,
-      booking_type: form.booking_type || null,
-      destination: form.destination || propertyName || null,
+      booking_type: finalBookingType,
+      destination: finalDestination,
       preferred_dates: form.preferred_dates,
       guests: form.guests ? parseInt(form.guests) : null,
       budget_range: form.budget_range,
@@ -58,7 +91,6 @@ export default function EnquiryForm() {
     } else {
       setSubmitted(true)
 
-      // Fire-and-forget: don't let an email failure block the success message
       fetch('/api/send-enquiry-notification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,7 +99,7 @@ export default function EnquiryForm() {
           email: form.email,
           phone: form.phone,
           preferred_contact: form.preferred_contact,
-          destination: form.destination || propertyName || null,
+          destination: finalDestination,
           preferred_dates: form.preferred_dates,
           guests: form.guests,
           budget_range: form.budget_range,
@@ -129,7 +161,7 @@ export default function EnquiryForm() {
                 value={form.name}
                 onChange={(e) => updateField('name', e.target.value)}
                 className={inputClass}
-                placeholder="Jordan Blake"
+                placeholder="Enter Name"
               />
             </div>
             <div>
@@ -140,7 +172,7 @@ export default function EnquiryForm() {
                 value={form.email}
                 onChange={(e) => updateField('email', e.target.value)}
                 className={inputClass}
-                placeholder="jordan@email.com"
+                placeholder="Email Address"
               />
             </div>
           </div>
@@ -170,9 +202,32 @@ export default function EnquiryForm() {
           </div>
 
           {!propertyName && (
+            <div>
+              <label className={labelClass}>What are you enquiring about</label>
+              <select
+                value={propertySelection}
+                onChange={(e) => setPropertySelection(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Select...</option>
+                <option value="general">General booking enquiry (not listed)</option>
+                {Object.entries(groupedProperties).map(([type, props]) => (
+                  <optgroup key={type} label={typeLabel[type] || type}>
+                    {props.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {!propertyName && isGeneral && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>What are you booking</label>
+                <label className={labelClass}>Type</label>
                 <select
                   value={form.booking_type}
                   onChange={(e) => updateField('booking_type', e.target.value)}
