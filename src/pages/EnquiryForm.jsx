@@ -19,9 +19,9 @@ export default function EnquiryForm() {
     email: '',
     phone: '',
     preferred_contact: 'Email',
-    booking_type: propertyType || '',
     destination: '',
     preferred_dates: '',
+    flexible_dates: '',
     guests: '',
     budget_range: '',
     notes: '',
@@ -54,7 +54,7 @@ export default function EnquiryForm() {
   }, {})
 
   const selectedProperty = properties.find((p) => p.id === propertySelection)
-  const isGeneral = propertySelection === 'general' || (!propertySelection && !propertyName)
+  const isGeneral = propertySelection === 'general'
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -63,9 +63,12 @@ export default function EnquiryForm() {
 
     const finalPropertyId = propertyId || (selectedProperty ? selectedProperty.id : null)
     const finalPropertyName = propertyName || (selectedProperty ? selectedProperty.name : null)
-    const finalBookingType =
-      propertyType || (selectedProperty ? selectedProperty.type : form.booking_type) || null
+    const finalBookingType = propertyType || (selectedProperty ? selectedProperty.type : null)
     const finalDestination = form.destination || finalPropertyName || null
+
+    const notesWithFlex = form.flexible_dates
+      ? `${form.notes ? form.notes + '\n\n' : ''}Flexible on dates: ${form.flexible_dates}`
+      : form.notes
 
     const { error } = await supabase.from('enquiries').insert({
       property_id: finalPropertyId,
@@ -79,7 +82,7 @@ export default function EnquiryForm() {
       preferred_dates: form.preferred_dates,
       guests: form.guests ? parseInt(form.guests) : null,
       budget_range: form.budget_range,
-      notes: form.notes,
+      notes: notesWithFlex,
       status: 'New',
       source: 'Website',
     })
@@ -103,7 +106,7 @@ export default function EnquiryForm() {
           preferred_dates: form.preferred_dates,
           guests: form.guests,
           budget_range: form.budget_range,
-          notes: form.notes,
+          notes: notesWithFlex,
         }),
       }).catch((err) => console.error('Notification email failed:', err))
     }
@@ -227,17 +230,15 @@ export default function EnquiryForm() {
           {!propertyName && isGeneral && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Type</label>
-                <select
-                  value={form.booking_type}
-                  onChange={(e) => updateField('booking_type', e.target.value)}
+                <label className={labelClass}>Number of guests</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.guests}
+                  onChange={(e) => updateField('guests', e.target.value)}
                   className={inputClass}
-                >
-                  <option value="">Select...</option>
-                  <option value="villa">Villa</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="yacht">Yacht</option>
-                </select>
+                  placeholder="e.g. 8"
+                />
               </div>
               <div>
                 <label className={labelClass}>Destination in mind</label>
@@ -258,29 +259,30 @@ export default function EnquiryForm() {
                 value={form.preferred_dates}
                 onChange={(e) => updateField('preferred_dates', e.target.value)}
                 className={inputClass}
-                placeholder="e.g. 14–21 Aug, or flexible"
+                placeholder="e.g. 14–21 Aug"
               />
             </div>
             <div>
-              <label className={labelClass}>Number of guests</label>
-              <input
-                type="number"
-                min="1"
-                value={form.guests}
-                onChange={(e) => updateField('guests', e.target.value)}
+              <label className={labelClass}>Flexible on dates?</label>
+              <select
+                value={form.flexible_dates}
+                onChange={(e) => updateField('flexible_dates', e.target.value)}
                 className={inputClass}
-                placeholder="e.g. 8"
-              />
+              >
+                <option value="">Select...</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Budget range (optional)</label>
+            <label className={labelClass}>Budget (per person/per night) (optional)</label>
             <input
               value={form.budget_range}
               onChange={(e) => updateField('budget_range', e.target.value)}
               className={inputClass}
-              placeholder="e.g. £2,000–£3,000 per night"
+              placeholder="e.g. £200–£300"
             />
           </div>
 
@@ -291,7 +293,7 @@ export default function EnquiryForm() {
               onChange={(e) => updateField('notes', e.target.value)}
               className={inputClass}
               rows={4}
-              placeholder="Special requests, occasion, flexibility on dates..."
+              placeholder="Special requests, occasion..."
             />
           </div>
 
