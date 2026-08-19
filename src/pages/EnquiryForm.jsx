@@ -227,7 +227,7 @@ export default function EnquiryForm() {
             </div>
           )}
 
-          {!propertyName && isGeneral && (
+          {!propertyName && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Number of guests</label>
@@ -277,7 +277,7 @@ export default function EnquiryForm() {
           </div>
 
           <div>
-            <label className={labelClass}>Budget (per person/per night) (optional)</label>
+            <label className={labelClass}>Budget (per person/per night)</label>
             <input
               value={form.budget_range}
               onChange={(e) => updateField('budget_range', e.target.value)}
