@@ -57,6 +57,23 @@ export default function EnquiryForm() {
       setError('Something went wrong sending your enquiry. Please try again.')
     } else {
       setSubmitted(true)
+
+      // Fire-and-forget: don't let an email failure block the success message
+      fetch('/api/send-enquiry-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          preferred_contact: form.preferred_contact,
+          destination: form.destination || propertyName || null,
+          preferred_dates: form.preferred_dates,
+          guests: form.guests,
+          budget_range: form.budget_range,
+          notes: form.notes,
+        }),
+      }).catch((err) => console.error('Notification email failed:', err))
     }
   }
 
