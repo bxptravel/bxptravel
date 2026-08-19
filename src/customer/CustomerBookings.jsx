@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 
+const ADMIN_EMAIL = 'travelbxp@gmail.com'
+
 const statusLabel = {
   awaiting_deposit: 'Awaiting deposit',
   deposit_submitted: 'Deposit submitted — verifying',
@@ -59,12 +61,32 @@ export default function CustomerBookings() {
     setLoading(false)
   }
 
+  async function sendBookingEmail(type, to, data) {
+    try {
+      await fetch('/api/send-booking-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, to, data }),
+      })
+    } catch (err) {
+      console.error('Booking email failed:', err)
+    }
+  }
+
   async function markDepositSent(booking) {
     setUpdating(booking.id)
     await supabase
       .from('bookings')
       .update({ status: 'deposit_submitted', deposit_submitted_at: new Date().toISOString() })
       .eq('id', booking.id)
+
+    const property = properties[booking.property_id]
+    sendBookingEmail('deposit_submitted', ADMIN_EMAIL, {
+      customerEmail: session.user.email,
+      propertyName: property?.name || 'a property',
+      depositAmount: booking.deposit_amount,
+    })
+
     await loadData()
     setUpdating(null)
   }
@@ -75,6 +97,14 @@ export default function CustomerBookings() {
       .from('bookings')
       .update({ status: 'balance_submitted', balance_submitted_at: new Date().toISOString() })
       .eq('id', booking.id)
+
+    const property = properties[booking.property_id]
+    sendBookingEmail('balance_submitted', ADMIN_EMAIL, {
+      customerEmail: session.user.email,
+      propertyName: property?.name || 'a property',
+      balanceAmount: booking.balance_amount,
+    })
+
     await loadData()
     setUpdating(null)
   }

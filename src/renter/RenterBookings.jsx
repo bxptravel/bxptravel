@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 
+const ADMIN_EMAIL = 'travelbxp@gmail.com'
+
 const statusLabel = {
   pending_renter_approval: 'Awaiting your decision',
   confirmed: 'Confirmed',
@@ -34,6 +36,7 @@ export default function RenterBookings() {
   const { session } = useAuth()
   const [bookings, setBookings] = useState([])
   const [properties, setProperties] = useState({})
+  const [customers, setCustomers] = useState({})
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
 
@@ -67,7 +70,31 @@ export default function RenterBookings() {
       setProperties(map)
     }
 
+    const customerIds = [...new Set((bookingsData || []).map((b) => b.customer_id))]
+    if (customerIds.length) {
+      const { data: customersData } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', customerIds)
+
+      const cMap = {}
+      customersData?.forEach((c) => (cMap[c.id] = c))
+      setCustomers(cMap)
+    }
+
     setLoading(false)
+  }
+
+  async function sendBookingEmail(type, to, data) {
+    try {
+      await fetch('/api/send-booking-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, to, data }),
+      })
+    } catch (err) {
+      console.error('Booking email failed:', err)
+    }
   }
 
   async function handleApprove(booking) {
@@ -83,6 +110,18 @@ export default function RenterBookings() {
       })
       .eq('id', booking.id)
 
+    const customer = customers[booking.customer_id]
+    const property = properties[booking.property_id]
+    if (customer) {
+      sendBookingEmail('booking_confirmed', customer.email, {
+        propertyName: property?.name || 'your property',
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+        balanceAmount: booking.balance_amount,
+        balanceDueDate,
+      })
+    }
+
     await loadData()
     setUpdating(null)
   }
@@ -95,6 +134,18 @@ export default function RenterBookings() {
       .from('bookings')
       .update({ status: 'declined', declined_at: new Date().toISOString() })
       .eq('id', booking.id)
+
+    const customer = customers[booking.customer_id]
+    const property = properties[booking.property_id]
+    if (customer) {
+      sendBookingEmail('booking_declined', customer.email, {
+        propertyName: property?.name || 'your property',
+      })
+      sendBookingEmail('booking_declined_admin', ADMIN_EMAIL, {
+        propertyName: property?.name || 'a property',
+        customerEmail: customer.email,
+      })
+    }
 
     await loadData()
     setUpdating(null)

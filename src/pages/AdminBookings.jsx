@@ -43,6 +43,7 @@ export default function AdminBookings() {
   const [bookings, setBookings] = useState([])
   const [properties, setProperties] = useState({})
   const [customers, setCustomers] = useState([])
+  const [renters, setRenters] = useState([])
   const [propertyList, setPropertyList] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -84,12 +85,30 @@ export default function AdminBookings() {
       .eq('role', 'customer')
     setCustomers(customersData || [])
 
+    const { data: rentersData } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .eq('role', 'renter')
+    setRenters(rentersData || [])
+
     const { data: allProps } = await supabase
       .from('properties')
       .select('id, name, location, renter_id')
     setPropertyList(allProps || [])
 
     setLoading(false)
+  }
+
+  async function sendBookingEmail(type, to, data) {
+    try {
+      await fetch('/api/send-booking-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, to, data }),
+      })
+    } catch (err) {
+      console.error('Booking email failed:', err)
+    }
   }
 
   async function autoCancelOverdue() {
@@ -131,6 +150,15 @@ export default function AdminBookings() {
     if (error) {
       setError(error.message)
     } else {
+      const customer = customers.find((c) => c.id === form.customer_id)
+      if (customer) {
+        sendBookingEmail('deposit_instructions', customer.email, {
+          propertyName: selectedProperty?.name || 'your property',
+          checkIn: form.check_in,
+          checkOut: form.check_out,
+          depositAmount: deposit,
+        })
+      }
       setModalOpen(false)
       setForm(emptyForm)
       loadEverything()
@@ -148,6 +176,19 @@ export default function AdminBookings() {
         balance_due_date: balanceDueDate,
       })
       .eq('id', booking.id)
+
+    const customer = customers.find((c) => c.id === booking.customer_id)
+    const property = properties[booking.property_id]
+    if (customer) {
+      sendBookingEmail('booking_confirmed', customer.email, {
+        propertyName: property?.name || 'your property',
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+        balanceAmount: booking.balance_amount,
+        balanceDueDate,
+      })
+    }
+
     await loadEverything()
     setUpdating(null)
   }
@@ -159,6 +200,15 @@ export default function AdminBookings() {
       .from('bookings')
       .update({ status: 'declined', declined_at: new Date().toISOString() })
       .eq('id', booking.id)
+
+    const customer = customers.find((c) => c.id === booking.customer_id)
+    const property = properties[booking.property_id]
+    if (customer) {
+      sendBookingEmail('booking_declined', customer.email, {
+        propertyName: property?.name || 'your property',
+      })
+    }
+
     await loadEverything()
     setUpdating(null)
   }
@@ -172,6 +222,18 @@ export default function AdminBookings() {
         deposit_verified_at: new Date().toISOString(),
       })
       .eq('id', booking.id)
+
+    const renter = renters.find((r) => r.id === booking.renter_id)
+    const property = properties[booking.property_id]
+    if (renter) {
+      sendBookingEmail('pending_renter_approval', renter.email, {
+        propertyName: property?.name || 'a property',
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+        depositAmount: booking.deposit_amount,
+      })
+    }
+
     await loadEverything()
     setUpdating(null)
   }
@@ -182,6 +244,27 @@ export default function AdminBookings() {
       .from('bookings')
       .update({ status: 'completed', balance_verified_at: new Date().toISOString() })
       .eq('id', booking.id)
+
+    const customer = customers.find((c) => c.id === booking.customer_id)
+    const renter = renters.find((r) => r.id === booking.renter_id)
+    const property = properties[booking.property_id]
+
+    if (customer) {
+      sendBookingEmail('booking_completed_customer', customer.email, {
+        propertyName: property?.name || 'your property',
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+      })
+    }
+    if (renter) {
+      sendBookingEmail('booking_completed_renter', renter.email, {
+        propertyName: property?.name || 'the property',
+        customerEmail: customer?.email || 'the guest',
+        checkIn: booking.check_in,
+        checkOut: booking.check_out,
+      })
+    }
+
     await loadEverything()
     setUpdating(null)
   }
