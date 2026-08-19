@@ -28,6 +28,17 @@ const templates = {
     `,
   }),
 
+  deposit_verified: (d) => ({
+    subject: `Deposit verified — ${d.propertyName}`,
+    html: `
+      <h2>Your deposit has been verified</h2>
+      <p><strong>${d.propertyName}</strong></p>
+      <p>${d.checkIn} → ${d.checkOut}</p>
+      <p>We've received and verified your deposit. Your request has now been sent to the
+      property owner — we'll let you know as soon as it's approved.</p>
+    `,
+  }),
+
   pending_renter_approval: (d) => ({
     subject: `New booking request — ${d.propertyName}`,
     html: `

@@ -85,6 +85,13 @@ export default function RenterBookings() {
     setLoading(false)
   }
 
+  async function getCustomerEmail(id) {
+    if (customers[id]) return customers[id].email
+    if (!id) return null
+    const { data } = await supabase.from('profiles').select('email').eq('id', id).single()
+    return data?.email || null
+  }
+
   async function sendBookingEmail(type, to, data) {
     try {
       await fetch('/api/send-booking-email', {
@@ -110,10 +117,10 @@ export default function RenterBookings() {
       })
       .eq('id', booking.id)
 
-    const customer = customers[booking.customer_id]
+    const customerEmail = await getCustomerEmail(booking.customer_id)
     const property = properties[booking.property_id]
-    if (customer) {
-      sendBookingEmail('booking_confirmed', customer.email, {
+    if (customerEmail) {
+      sendBookingEmail('booking_confirmed', customerEmail, {
         propertyName: property?.name || 'your property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
@@ -135,15 +142,15 @@ export default function RenterBookings() {
       .update({ status: 'declined', declined_at: new Date().toISOString() })
       .eq('id', booking.id)
 
-    const customer = customers[booking.customer_id]
+    const customerEmail = await getCustomerEmail(booking.customer_id)
     const property = properties[booking.property_id]
-    if (customer) {
-      sendBookingEmail('booking_declined', customer.email, {
+    if (customerEmail) {
+      sendBookingEmail('booking_declined', customerEmail, {
         propertyName: property?.name || 'your property',
       })
       sendBookingEmail('booking_declined_admin', ADMIN_EMAIL, {
         propertyName: property?.name || 'a property',
-        customerEmail: customer.email,
+        customerEmail: customerEmail,
       })
     }
 
