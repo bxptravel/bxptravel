@@ -105,10 +105,7 @@ export default function AdminBookings() {
     const cached = cachedList.find((c) => c.id === id)
     if (cached) return cached.email
     if (!id) return null
-    const { data, error } = await supabase.from('profiles').select('email').eq('id', id).single()
-    if (error || !data?.email) {
-      console.error('Profile email lookup failed:', { id, error })
-    }
+    const { data } = await supabase.from('profiles').select('email').eq('id', id).single()
     return data?.email || null
   }
 
@@ -256,20 +253,23 @@ export default function AdminBookings() {
       })
       .eq('id', booking.id)
 
-    const renterEmail = await getProfileEmail(booking.renter_id, renters)
-    const customerEmail = await getProfileEmail(booking.customer_id, customers)
     const property = properties[booking.property_id]
 
+    // Fully sequential, awaited — renter's email completes entirely
+    // before the customer's even begins, no shared timing at all.
+    const renterEmail = await getProfileEmail(booking.renter_id, renters)
     if (renterEmail) {
-      sendBookingEmail('pending_renter_approval', renterEmail, {
+      await sendBookingEmail('pending_renter_approval', renterEmail, {
         propertyName: property?.name || 'a property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
         depositAmount: booking.deposit_amount,
       })
     }
+
+    const customerEmail = await getProfileEmail(booking.customer_id, customers)
     if (customerEmail) {
-      sendBookingEmail('deposit_verified', customerEmail, {
+      await sendBookingEmail('deposit_verified', customerEmail, {
         propertyName: property?.name || 'your property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
