@@ -37,6 +37,7 @@ const emptyForm = {
   check_in: '',
   check_out: '',
   total_price: '',
+  enquiry_id: '',
 }
 
 export default function AdminBookings() {
@@ -45,6 +46,7 @@ export default function AdminBookings() {
   const [customers, setCustomers] = useState([])
   const [renters, setRenters] = useState([])
   const [propertyList, setPropertyList] = useState([])
+  const [matchingEnquiries, setMatchingEnquiries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -103,7 +105,10 @@ export default function AdminBookings() {
     const cached = cachedList.find((c) => c.id === id)
     if (cached) return cached.email
     if (!id) return null
-    const { data } = await supabase.from('profiles').select('email').eq('id', id).single()
+    const { data, error } = await supabase.from('profiles').select('email').eq('id', id).single()
+    if (error || !data?.email) {
+      console.error('Profile email lookup failed:', { id, error })
+    }
     return data?.email || null
   }
 
@@ -130,6 +135,24 @@ export default function AdminBookings() {
 
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
+    if (field === 'customer_id') {
+      loadMatchingEnquiries(value)
+    }
+  }
+
+  async function loadMatchingEnquiries(customerId) {
+    setForm((prev) => ({ ...prev, enquiry_id: '' }))
+    const customer = customers.find((c) => c.id === customerId)
+    if (!customer) {
+      setMatchingEnquiries([])
+      return
+    }
+    const { data } = await supabase
+      .from('enquiries')
+      .select('id, name, destination, preferred_dates, created_at')
+      .eq('email', customer.email)
+      .order('created_at', { ascending: false })
+    setMatchingEnquiries(data || [])
   }
 
   async function handleCreateBooking(e) {
@@ -151,6 +174,7 @@ export default function AdminBookings() {
       deposit_amount: deposit,
       balance_amount: Math.round((total - deposit) * 100) / 100,
       status: 'awaiting_deposit',
+      enquiry_id: form.enquiry_id || null,
     })
 
     setSaving(false)
@@ -169,6 +193,7 @@ export default function AdminBookings() {
       }
       setModalOpen(false)
       setForm(emptyForm)
+      setMatchingEnquiries([])
       loadEverything()
     }
   }
@@ -309,7 +334,11 @@ export default function AdminBookings() {
           <p className="text-muted text-sm mt-1">Every booking, across every property</p>
         </div>
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            setForm(emptyForm)
+            setMatchingEnquiries([])
+            setModalOpen(true)
+          }}
           className="bg-forest text-bone font-semibold rounded-lg px-5 py-2.5 text-sm hover:bg-forestlight transition"
         >
           + Create booking
@@ -360,6 +389,9 @@ export default function AdminBookings() {
                     <div>
                       Balance: <span className="text-ink font-medium">£{booking.balance_amount}</span>
                     </div>
+                  )}
+                  {booking.enquiry_id && (
+                    <div className="text-brass">Linked to original enquiry</div>
                   )}
                 </div>
 
@@ -450,6 +482,28 @@ export default function AdminBookings() {
                   ))}
                 </select>
               </div>
+
+              {matchingEnquiries.length > 0 && (
+                <div>
+                  <label className={labelClass}>Link to enquiry (optional)</label>
+                  <select
+                    value={form.enquiry_id}
+                    onChange={(e) => updateField('enquiry_id', e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">No link</option>
+                    {matchingEnquiries.map((eq) => (
+                      <option key={eq.id} value={eq.id}>
+                        {eq.destination || 'General'} · {eq.preferred_dates || 'no dates'} ·{' '}
+                        {new Date(eq.created_at).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted mt-1">
+                    {matchingEnquiries.length} enquir{matchingEnquiries.length === 1 ? 'y' : 'ies'} found for this customer's email.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className={labelClass}>Property</label>

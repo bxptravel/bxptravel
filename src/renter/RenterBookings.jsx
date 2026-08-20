@@ -88,7 +88,10 @@ export default function RenterBookings() {
   async function getCustomerEmail(id) {
     if (customers[id]) return customers[id].email
     if (!id) return null
-    const { data } = await supabase.from('profiles').select('email').eq('id', id).single()
+    const { data, error } = await supabase.from('profiles').select('email').eq('id', id).single()
+    if (error || !data?.email) {
+      console.error('Customer email lookup failed:', { id, error })
+    }
     return data?.email || null
   }
 
