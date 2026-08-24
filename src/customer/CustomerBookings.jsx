@@ -81,7 +81,7 @@ export default function CustomerBookings() {
       .eq('id', booking.id)
 
     const property = properties[booking.property_id]
-    sendBookingEmail('deposit_submitted', ADMIN_EMAIL, {
+    await sendBookingEmail('deposit_submitted', ADMIN_EMAIL, {
       customerEmail: session.user.email,
       propertyName: property?.name || 'a property',
       depositAmount: booking.deposit_amount,
@@ -99,7 +99,7 @@ export default function CustomerBookings() {
       .eq('id', booking.id)
 
     const property = properties[booking.property_id]
-    sendBookingEmail('balance_submitted', ADMIN_EMAIL, {
+    await sendBookingEmail('balance_submitted', ADMIN_EMAIL, {
       customerEmail: session.user.email,
       propertyName: property?.name || 'a property',
       balanceAmount: booking.balance_amount,

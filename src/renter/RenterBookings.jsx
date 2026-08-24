@@ -88,10 +88,7 @@ export default function RenterBookings() {
   async function getCustomerEmail(id) {
     if (customers[id]) return customers[id].email
     if (!id) return null
-    const { data, error } = await supabase.from('profiles').select('email').eq('id', id).single()
-    if (error || !data?.email) {
-      console.error('Customer email lookup failed:', { id, error })
-    }
+    const { data } = await supabase.from('profiles').select('email').eq('id', id).single()
     return data?.email || null
   }
 
@@ -123,7 +120,7 @@ export default function RenterBookings() {
     const customerEmail = await getCustomerEmail(booking.customer_id)
     const property = properties[booking.property_id]
     if (customerEmail) {
-      sendBookingEmail('booking_confirmed', customerEmail, {
+      await sendBookingEmail('booking_confirmed', customerEmail, {
         propertyName: property?.name || 'your property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
@@ -148,10 +145,10 @@ export default function RenterBookings() {
     const customerEmail = await getCustomerEmail(booking.customer_id)
     const property = properties[booking.property_id]
     if (customerEmail) {
-      sendBookingEmail('booking_declined', customerEmail, {
+      await sendBookingEmail('booking_declined', customerEmail, {
         propertyName: property?.name || 'your property',
       })
-      sendBookingEmail('booking_declined_admin', ADMIN_EMAIL, {
+      await sendBookingEmail('booking_declined_admin', ADMIN_EMAIL, {
         propertyName: property?.name || 'a property',
         customerEmail: customerEmail,
       })

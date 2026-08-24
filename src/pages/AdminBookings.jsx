@@ -181,7 +181,7 @@ export default function AdminBookings() {
     } else {
       const customerEmail = await getProfileEmail(form.customer_id, customers)
       if (customerEmail) {
-        sendBookingEmail('deposit_instructions', customerEmail, {
+        await sendBookingEmail('deposit_instructions', customerEmail, {
           propertyName: selectedProperty?.name || 'your property',
           checkIn: form.check_in,
           checkOut: form.check_out,
@@ -210,7 +210,7 @@ export default function AdminBookings() {
     const customerEmail = await getProfileEmail(booking.customer_id, customers)
     const property = properties[booking.property_id]
     if (customerEmail) {
-      sendBookingEmail('booking_confirmed', customerEmail, {
+      await sendBookingEmail('booking_confirmed', customerEmail, {
         propertyName: property?.name || 'your property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
@@ -234,7 +234,7 @@ export default function AdminBookings() {
     const customerEmail = await getProfileEmail(booking.customer_id, customers)
     const property = properties[booking.property_id]
     if (customerEmail) {
-      sendBookingEmail('booking_declined', customerEmail, {
+      await sendBookingEmail('booking_declined', customerEmail, {
         propertyName: property?.name || 'your property',
       })
     }
@@ -255,8 +255,6 @@ export default function AdminBookings() {
 
     const property = properties[booking.property_id]
 
-    // Fully sequential, awaited — renter's email completes entirely
-    // before the customer's even begins, no shared timing at all.
     const renterEmail = await getProfileEmail(booking.renter_id, renters)
     if (renterEmail) {
       await sendBookingEmail('pending_renter_approval', renterEmail, {
@@ -292,14 +290,14 @@ export default function AdminBookings() {
     const property = properties[booking.property_id]
 
     if (customerEmail) {
-      sendBookingEmail('booking_completed_customer', customerEmail, {
+      await sendBookingEmail('booking_completed_customer', customerEmail, {
         propertyName: property?.name || 'your property',
         checkIn: booking.check_in,
         checkOut: booking.check_out,
       })
     }
     if (renterEmail) {
-      sendBookingEmail('booking_completed_renter', renterEmail, {
+      await sendBookingEmail('booking_completed_renter', renterEmail, {
         propertyName: property?.name || 'the property',
         customerEmail: customerEmail || 'the guest',
         checkIn: booking.check_in,
