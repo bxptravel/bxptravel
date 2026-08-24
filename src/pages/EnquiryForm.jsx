@@ -29,6 +29,7 @@ export default function EnquiryForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
 
   useEffect(() => {
     if (!propertyName) loadProperties()
@@ -56,8 +57,35 @@ export default function EnquiryForm() {
   const selectedProperty = properties.find((p) => p.id === propertySelection)
   const isGeneral = propertySelection === 'general'
 
+  function getMissingFields() {
+    const missing = []
+    if (!form.name) missing.push('name')
+    if (!form.email) missing.push('email')
+    if (!form.phone) missing.push('phone')
+    if (!propertyName && !propertySelection) missing.push('propertySelection')
+    if (!propertyName && !form.guests) missing.push('guests')
+    if (!propertyName && !form.destination) missing.push('destination')
+    if (!form.preferred_dates) missing.push('preferred_dates')
+    if (!form.flexible_dates) missing.push('flexible_dates')
+    if (!form.budget_range) missing.push('budget_range')
+    return missing
+  }
+
+  function fieldClass(fieldName) {
+    const isMissing = submitAttempted && getMissingFields().includes(fieldName)
+    return isMissing ? `${inputClass} border-red-400 focus:border-red-400` : inputClass
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
+    setSubmitAttempted(true)
+
+    const missing = getMissingFields()
+    if (missing.length > 0) {
+      setError('Please fill in all fields before submitting.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
@@ -155,15 +183,14 @@ export default function EnquiryForm() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Full name</label>
               <input
-                required
                 value={form.name}
                 onChange={(e) => updateField('name', e.target.value)}
-                className={inputClass}
+                className={fieldClass('name')}
                 placeholder="Enter Name"
               />
             </div>
@@ -171,10 +198,9 @@ export default function EnquiryForm() {
               <label className={labelClass}>Email</label>
               <input
                 type="email"
-                required
                 value={form.email}
                 onChange={(e) => updateField('email', e.target.value)}
-                className={inputClass}
+                className={fieldClass('email')}
                 placeholder="Email Address"
               />
             </div>
@@ -184,10 +210,9 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>Phone number</label>
               <input
-                required
                 value={form.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
-                className={inputClass}
+                className={fieldClass('phone')}
                 placeholder="+44 7700 900000"
               />
             </div>
@@ -209,10 +234,9 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>What are you enquiring about</label>
               <select
-                required
                 value={propertySelection}
                 onChange={(e) => setPropertySelection(e.target.value)}
-                className={inputClass}
+                className={fieldClass('propertySelection')}
               >
                 <option value="">Select...</option>
                 <option value="general">General booking enquiry (not listed)</option>
@@ -236,20 +260,18 @@ export default function EnquiryForm() {
                 <input
                   type="number"
                   min="1"
-                  required
                   value={form.guests}
                   onChange={(e) => updateField('guests', e.target.value)}
-                  className={inputClass}
+                  className={fieldClass('guests')}
                   placeholder="e.g. 8"
                 />
               </div>
               <div>
                 <label className={labelClass}>Destination in mind</label>
                 <input
-                  required
                   value={form.destination}
                   onChange={(e) => updateField('destination', e.target.value)}
-                  className={inputClass}
+                  className={fieldClass('destination')}
                   placeholder="e.g. Ibiza"
                 />
               </div>
@@ -260,20 +282,18 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>Preferred dates</label>
               <input
-                required
                 value={form.preferred_dates}
                 onChange={(e) => updateField('preferred_dates', e.target.value)}
-                className={inputClass}
+                className={fieldClass('preferred_dates')}
                 placeholder="e.g. 14–21 Aug"
               />
             </div>
             <div>
               <label className={labelClass}>Flexible on dates?</label>
               <select
-                required
                 value={form.flexible_dates}
                 onChange={(e) => updateField('flexible_dates', e.target.value)}
-                className={inputClass}
+                className={fieldClass('flexible_dates')}
               >
                 <option value="">Select...</option>
                 <option value="Yes">Yes</option>
@@ -285,18 +305,19 @@ export default function EnquiryForm() {
           <div>
             <label className={labelClass}>Budget (per person/per night)</label>
             <input
-              required
               value={form.budget_range}
               onChange={(e) => updateField('budget_range', e.target.value)}
-              className={inputClass}
+              className={fieldClass('budget_range')}
               placeholder="e.g. £200–£300"
             />
           </div>
 
           <div>
             <label className={labelClass}>Anything else we should know</label>
+            <p className="text-xs text-muted mb-1.5">
+              The more info we have, the better we can meet your needs.
+            </p>
             <textarea
-              required
               value={form.notes}
               onChange={(e) => updateField('notes', e.target.value)}
               className={inputClass}
