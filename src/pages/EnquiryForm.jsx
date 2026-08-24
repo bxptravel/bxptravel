@@ -184,6 +184,7 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>Phone number</label>
               <input
+                required
                 value={form.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
                 className={inputClass}
@@ -208,6 +209,7 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>What are you enquiring about</label>
               <select
+                required
                 value={propertySelection}
                 onChange={(e) => setPropertySelection(e.target.value)}
                 className={inputClass}
@@ -234,6 +236,7 @@ export default function EnquiryForm() {
                 <input
                   type="number"
                   min="1"
+                  required
                   value={form.guests}
                   onChange={(e) => updateField('guests', e.target.value)}
                   className={inputClass}
@@ -243,6 +246,7 @@ export default function EnquiryForm() {
               <div>
                 <label className={labelClass}>Destination in mind</label>
                 <input
+                  required
                   value={form.destination}
                   onChange={(e) => updateField('destination', e.target.value)}
                   className={inputClass}
@@ -256,6 +260,7 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>Preferred dates</label>
               <input
+                required
                 value={form.preferred_dates}
                 onChange={(e) => updateField('preferred_dates', e.target.value)}
                 className={inputClass}
@@ -265,6 +270,7 @@ export default function EnquiryForm() {
             <div>
               <label className={labelClass}>Flexible on dates?</label>
               <select
+                required
                 value={form.flexible_dates}
                 onChange={(e) => updateField('flexible_dates', e.target.value)}
                 className={inputClass}
@@ -279,6 +285,7 @@ export default function EnquiryForm() {
           <div>
             <label className={labelClass}>Budget (per person/per night)</label>
             <input
+              required
               value={form.budget_range}
               onChange={(e) => updateField('budget_range', e.target.value)}
               className={inputClass}
@@ -289,6 +296,7 @@ export default function EnquiryForm() {
           <div>
             <label className={labelClass}>Anything else we should know</label>
             <textarea
+              required
               value={form.notes}
               onChange={(e) => updateField('notes', e.target.value)}
               className={inputClass}
