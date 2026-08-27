@@ -159,7 +159,7 @@ export default function AdminBookings() {
 
     const selectedProperty = propertyList.find((p) => p.id === form.property_id)
     const total = parseFloat(form.total_price)
-    const deposit = Math.round(total * 0.1 * 100) / 100
+    const deposit = Math.round(total * 0.2 * 100) / 100
 
     const { error } = await supabase.from('bookings').insert({
       customer_id: form.customer_id,
@@ -555,7 +555,7 @@ export default function AdminBookings() {
                   placeholder="e.g. 3500"
                 />
                 <p className="text-xs text-muted mt-1">
-                  Deposit (10%) is calculated automatically.
+                  Deposit (20%) is calculated automatically.
                 </p>
               </div>
 

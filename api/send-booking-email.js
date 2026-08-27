@@ -14,6 +14,10 @@ const templates = {
       <p>A deposit of <strong>£${d.depositAmount}</strong> is required to move forward.</p>
       <p>Log in to your account to view payment details and confirm once you've sent it:</p>
       <p><a href="${SITE_URL}/account/login">${SITE_URL}/account/login</a></p>
+      <p><strong>Please note:</strong> your deposit is fully refundable if the property
+      owner is unable to confirm your stay. It is non-refundable if you choose to cancel.
+      If you simply need to change your dates, no problem — your deposit carries over
+      with no penalty.</p>
     `,
   }),
 
@@ -60,6 +64,8 @@ const templates = {
       <p>Balance of <strong>£${d.balanceAmount}</strong> is due by <strong>${d.balanceDueDate}</strong>.</p>
       <p>Log in to your account to view payment details:</p>
       <p><a href="${SITE_URL}/account/login">${SITE_URL}/account/login</a></p>
+      <p>As a reminder, your deposit is non-refundable if you choose to cancel — but never
+      lost if you simply need to adjust your dates.</p>
     `,
   }),
 
