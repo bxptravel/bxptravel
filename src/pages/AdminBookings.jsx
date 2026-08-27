@@ -265,10 +265,6 @@ export default function AdminBookings() {
       })
     }
 
-    // Deliberate pause so this doesn't fire within the same second as the
-    // email above — Resend rate-limits rapid back-to-back sends.
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-
     const customerEmail = await getProfileEmail(booking.customer_id, customers)
     if (customerEmail) {
       await sendBookingEmail('deposit_verified', customerEmail, {
@@ -300,9 +296,6 @@ export default function AdminBookings() {
         checkOut: booking.check_out,
       })
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-
     if (renterEmail) {
       await sendBookingEmail('booking_completed_renter', renterEmail, {
         propertyName: property?.name || 'the property',

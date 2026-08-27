@@ -148,7 +148,6 @@ export default function RenterBookings() {
       await sendBookingEmail('booking_declined', customerEmail, {
         propertyName: property?.name || 'your property',
       })
-      await new Promise((resolve) => setTimeout(resolve, 1200))
       await sendBookingEmail('booking_declined_admin', ADMIN_EMAIL, {
         propertyName: property?.name || 'a property',
         customerEmail: customerEmail,
