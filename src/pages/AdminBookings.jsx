@@ -309,6 +309,16 @@ export default function AdminBookings() {
     setUpdating(null)
   }
 
+  async function toggleRenterShareTransferred(booking) {
+    setUpdating(booking.id)
+    await supabase
+      .from('bookings')
+      .update({ renter_share_transferred: !booking.renter_share_transferred })
+      .eq('id', booking.id)
+    await loadEverything()
+    setUpdating(null)
+  }
+
   async function markRefundedAndCancel(booking) {
     if (!confirm("Confirm you've refunded the deposit? This marks the booking as cancelled.")) return
     setUpdating(booking.id)
@@ -392,6 +402,36 @@ export default function AdminBookings() {
                     <div className="text-brass">Linked to original enquiry</div>
                   )}
                 </div>
+
+                {!['awaiting_deposit', 'deposit_submitted'].includes(booking.status) && (
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-ink/[0.03] rounded-lg px-3 py-2.5">
+                      <div className="text-[10px] text-muted mb-0.5">Your share (10%)</div>
+                      <div className="text-base font-medium text-ink">
+                        £{Math.round((booking.deposit_amount / 2) * 100) / 100}
+                      </div>
+                    </div>
+                    <div className="bg-ink/[0.03] rounded-lg px-3 py-2.5">
+                      <div className="text-[10px] text-muted mb-0.5">Renter share (10%)</div>
+                      <div className="text-base font-medium text-ink mb-1">
+                        £{Math.round((booking.deposit_amount / 2) * 100) / 100}
+                      </div>
+                      <button
+                        onClick={() => toggleRenterShareTransferred(booking)}
+                        disabled={updating === booking.id}
+                        className={`text-[11px] font-medium rounded-full px-2.5 py-1 transition ${
+                          booking.renter_share_transferred
+                            ? 'bg-forest/10 text-forest border border-forest/25'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                        }`}
+                      >
+                        {booking.renter_share_transferred
+                          ? '✓ Transferred'
+                          : 'Not yet transferred'}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {booking.status === 'pending_renter_approval' && (
                   <div>
