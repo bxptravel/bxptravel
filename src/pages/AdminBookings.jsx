@@ -427,7 +427,7 @@ export default function AdminBookings() {
                       >
                         {booking.renter_share_transferred
                           ? '✓ Transferred'
-                          : 'Not yet transferred'}
+                          : 'Click to confirm deposit transfer'}
                       </button>
                     </div>
                   </div>
