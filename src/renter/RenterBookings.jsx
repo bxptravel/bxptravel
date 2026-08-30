@@ -205,6 +205,34 @@ export default function RenterBookings() {
                   </div>
                 </div>
 
+                {!['awaiting_deposit', 'deposit_submitted'].includes(booking.status) && (
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-ink/[0.03] rounded-lg px-3 py-2.5">
+                      <div className="text-[10px] text-muted mb-0.5">BXP share (10%)</div>
+                      <div className="text-base font-medium text-ink">
+                        £{Math.round((booking.deposit_amount / 2) * 100) / 100}
+                      </div>
+                    </div>
+                    <div className="bg-ink/[0.03] rounded-lg px-3 py-2.5">
+                      <div className="text-[10px] text-muted mb-0.5">Your share (10%)</div>
+                      <div className="text-base font-medium text-ink mb-1">
+                        £{Math.round((booking.deposit_amount / 2) * 100) / 100}
+                      </div>
+                      <span
+                        className={`inline-block text-[11px] font-medium rounded-full px-2.5 py-1 ${
+                          booking.renter_share_transferred
+                            ? 'bg-forest/10 text-forest border border-forest/25'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}
+                      >
+                        {booking.renter_share_transferred
+                          ? '✓ Transferred'
+                          : 'Deposit transfer processing'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {booking.status === 'pending_renter_approval' && (
                   <div className="flex gap-3">
                     <button
