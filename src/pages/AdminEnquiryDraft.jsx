@@ -23,11 +23,9 @@ function generateDraft(enquiry, property) {
     : `We need to know the full number of guests you are enquiring about`
 
   let priceLine
-  if (property?.price_from && property?.guests_capacity) {
-    const perPerson = Math.round(property.price_from / property.guests_capacity)
-    priceLine = `£${perPerson} per person, per night`
-  } else if (enquiry.budget_range) {
-    priceLine = `${enquiry.budget_range} (as per your enquiry — we'll confirm exact pricing shortly)`
+  if (enquiry.budget_range) {
+    const trimmed = enquiry.budget_range.trim()
+    priceLine = trimmed.startsWith('£') ? trimmed : `£${trimmed}`
   } else {
     priceLine = `To be confirmed`
   }
@@ -55,12 +53,7 @@ Please kindly respond and confirm all details in order for us to proceed with th
 
 Any questions at all, we're right here. Looking forward to getting this sorted for you!
 
-Kind regards,
-
-Customer Relations Team
-BXP Travel Ltd
-124 City Road | EC1V 2NX
-bxptravel.com | (+44) 7507723650`
+Kind regards,`
 }
 
 export default function AdminEnquiryDraft() {
