@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 
 const statusOptions = ['New', 'Quoted', 'Follow Up', 'Booked', 'Dead']
@@ -29,6 +30,7 @@ const emptyForm = {
 }
 
 export default function AdminEnquiries() {
+  const navigate = useNavigate()
   const [enquiries, setEnquiries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -316,6 +318,7 @@ export default function AdminEnquiries() {
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3">Follow-up</th>
                 <th className="text-left px-4 py-3"></th>
+                <th className="text-left px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -339,6 +342,14 @@ export default function AdminEnquiries() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted">{e.followup_date || '—'}</td>
+                  <td className="px-4 py-3" onClick={(ev) => ev.stopPropagation()}>
+                    <button
+                      onClick={() => navigate(`/admin/enquiries/${e.id}/draft`)}
+                      className="text-xs text-forest hover:underline"
+                    >
+                      Draft Email
+                    </button>
+                  </td>
                   <td className="px-4 py-3" onClick={(ev) => ev.stopPropagation()}>
                     <button
                       onClick={() => handleDelete(e.id)}

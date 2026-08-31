@@ -9,6 +9,7 @@ import AdminLayout from './pages/AdminLayout'
 import AdminProperties from './pages/AdminProperties'
 import PropertyForm from './pages/PropertyForm'
 import AdminEnquiries from './pages/AdminEnquiries'
+import AdminEnquiryDraft from './pages/AdminEnquiryDraft'
 import AdminBookings from './pages/AdminBookings'
 import RenterLogin from './renter/RenterLogin'
 import RenterLayout from './renter/RenterLayout'
@@ -43,6 +44,7 @@ function App() {
             <Route path="properties/new" element={<PropertyForm />} />
             <Route path="properties/:id" element={<PropertyForm />} />
             <Route path="enquiries" element={<AdminEnquiries />} />
+            <Route path="enquiries/:id/draft" element={<AdminEnquiryDraft />} />
             <Route path="bookings" element={<AdminBookings />} />
           </Route>
 
