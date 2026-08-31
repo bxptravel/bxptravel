@@ -63,7 +63,7 @@ export default function EnquiryForm() {
     if (!form.email) missing.push('email')
     if (!form.phone) missing.push('phone')
     if (!propertyName && !propertySelection) missing.push('propertySelection')
-    if (!propertyName && !form.guests) missing.push('guests')
+    if (!form.guests) missing.push('guests')
     if (!propertyName && !form.destination) missing.push('destination')
     if (!form.preferred_dates) missing.push('preferred_dates')
     if (!form.flexible_dates) missing.push('flexible_dates')
@@ -253,19 +253,19 @@ export default function EnquiryForm() {
             </div>
           )}
 
-          {!propertyName && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Number of guests</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.guests}
-                  onChange={(e) => updateField('guests', e.target.value)}
-                  className={fieldClass('guests')}
-                  placeholder="e.g. 8"
-                />
-              </div>
+          <div className={`grid ${propertyName ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+            <div>
+              <label className={labelClass}>Number of guests</label>
+              <input
+                type="number"
+                min="1"
+                value={form.guests}
+                onChange={(e) => updateField('guests', e.target.value)}
+                className={fieldClass('guests')}
+                placeholder="e.g. 8"
+              />
+            </div>
+            {!propertyName && (
               <div>
                 <label className={labelClass}>Destination in mind</label>
                 <input
@@ -275,8 +275,8 @@ export default function EnquiryForm() {
                   placeholder="e.g. Ibiza"
                 />
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
